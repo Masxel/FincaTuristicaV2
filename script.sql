@@ -52,6 +52,8 @@ CREATE TABLE `db_fincaturistica`.`estadohabitacion` (
     PRIMARY KEY(`id`)
 );
 
+
+
 -- Tabla para registrar los empleados de la finca turistica.
 CREATE TABLE `db_fincaturistica`.`empleados` (
     `id` INT AUTO_INCREMENT NOT NULL,
@@ -83,8 +85,8 @@ CREATE TABLE `db_fincaturistica`.`insumos` (
 
 -- Tabla para registrar los clientes que hacen reservas en la finca turistica.
 CREATE TABLE `db_fincaturistica`.`cliente` (
-    `id` INT AUTO_INCREMENT NOT NULL,
-    `nombre` VARCHAR(45) NOT NULL,
+    `id` INT NOT NULL,
+    `nombre` VARCHAR(45) NOT NULL,  
     `apellido` VARCHAR(45) NOT NULL,
     `telefono` VARCHAR(15) NOT NULL,
     `email` VARCHAR(45) NOT NULL,
@@ -343,6 +345,7 @@ END $$
 DELIMITER $$
 
 CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_cliente` (
+    IN _id INT,
     IN _nombre VARCHAR(45),
     IN _apellido VARCHAR(45),
     IN _telefono VARCHAR(15),
@@ -350,10 +353,15 @@ CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_cliente` (
     INOUT _respuesta INT
 )
 BEGIN
-    SET _respuesta = 0;
-    INSERT INTO `db_fincaturistica`.`cliente` (`nombre`, `apellido`, `telefono`, `email`)
-    VALUES (_nombre, _apellido, _telefono, _email);
-    SET _respuesta = LAST_INSERT_ID();
+   BEGIN
+    INSERT INTO `db_fincaturistica`.`cliente` (`id`, `nombre`, `apellido`, `telefono`, `email`)
+    VALUES (_id, _nombre, _apellido, _telefono, _email);
+    
+    IF ROW_COUNT() > 0 THEN
+        SET _respuesta = _id; 
+    ELSE
+        SET _respuesta = 0; 
+    END IF;
 END $$
 -- ====================================================================================== --
 
@@ -364,6 +372,19 @@ CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_todos_clientes` ()
 BEGIN
     SELECT `id`, `nombre`, `apellido`, `telefono`, `email`
     FROM `db_fincaturistica`.`cliente`;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR CLIENTE POR ID ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_cliente_por_id` (
+    IN _id INT
+)
+BEGIN
+    SELECT `id`, `nombre`, `apellido`, `telefono`, `email`
+    FROM `db_fincaturistica`.`cliente`
+    WHERE `id` = _id;
 END $$
 -- ====================================================================================== --
 
@@ -574,6 +595,28 @@ END $$
 
 -- ==================== PROCEDIMIENTOS ALMACENADOS PARA EVENTOS ===================== --
 
+-- ==================== INSERTAR EVENTO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_evento` (
+    IN p_descripcion VARCHAR(200)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    INSERT INTO `db_fincaturistica`.`eventos` (`descripcion`)
+    VALUES (p_descripcion);
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
 -- ==================== CONSULTAR EVENTOS DISPONIBLES ===================== --
 DELIMITER $$
 
@@ -582,5 +625,818 @@ BEGIN
     SELECT `id`, `descripcion`
     FROM `db_fincaturistica`.`eventos`
     ORDER BY `id`;
+END $$
+
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR EVENTO POR ID ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_evento_por_id` (
+    IN p_id INT
+)
+BEGIN
+    SELECT `id`, `descripcion`
+    FROM `db_fincaturistica`.`eventos`
+    WHERE `id` = p_id;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ACTUALIZAR EVENTO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_actualizar_evento` (
+    IN p_id INT,
+    IN p_descripcion VARCHAR(200)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    UPDATE `db_fincaturistica`.`eventos`
+    SET `descripcion` = p_descripcion
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ELIMINAR EVENTO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_eliminar_evento` (
+    IN p_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    DELETE FROM `db_fincaturistica`.`eventos`
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+
+DELIMITER ;
+-- ====================================================================================== --
+
+-- ==================== PROCEDIMIENTOS ALMACENADOS PARA EMPLEADOS ===================== --
+
+-- ==================== INSERTAR EMPLEADO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_empleado` (
+    IN p_id INT,
+    IN p_nombre VARCHAR(45),
+    IN p_apellido VARCHAR(45),
+    IN p_telefono VARCHAR(15),
+    IN p_email VARCHAR(45),
+    IN p_cargo INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+
+    INSERT INTO `db_fincaturistica`.`empleados` (`id`, `nombre`, `apellido`, `telefono`, `email`, `cargo`)
+    VALUES (p_id, p_nombre, p_apellido, p_telefono, p_email, p_cargo);
+
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR TODOS LOS EMPLEADOS ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_empleados` ()
+BEGIN
+    SELECT e.`id`, e.`nombre`, e.`apellido`, e.`telefono`, e.`email`, e.`cargo`, c.`descripcion` as `cargo_descripcion`
+    FROM `db_fincaturistica`.`empleados` e
+    LEFT JOIN `db_fincaturistica`.`cargo` c ON e.`cargo` = c.`id`
+    ORDER BY e.`id`;
+END $$
+
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR EMPLEADO POR ID ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_empleado_por_id` (
+    IN p_id INT
+)
+BEGIN
+    SELECT e.`id`, e.`nombre`, e.`apellido`, e.`telefono`, e.`email`, e.`cargo`, c.`descripcion` as `cargo_descripcion`
+    FROM `db_fincaturistica`.`empleados` e
+    LEFT JOIN `db_fincaturistica`.`cargo` c ON e.`cargo` = c.`id`
+    WHERE e.`id` = p_id;
+END $$
+
+-- ====================================================================================== --
+
+-- ==================== ACTUALIZAR EMPLEADO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_actualizar_empleado` (
+    IN p_id INT,
+    IN p_nombre VARCHAR(45),
+    IN p_apellido VARCHAR(45),
+    IN p_telefono VARCHAR(15),
+    IN p_email VARCHAR(45),
+    IN p_cargo INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    UPDATE `db_fincaturistica`.`empleados`
+    SET `nombre` = p_nombre,
+        `apellido` = p_apellido,
+        `telefono` = p_telefono,
+        `email` = p_email,
+        `cargo` = p_cargo
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+
+-- ====================================================================================== --
+
+-- ==================== ELIMINAR EMPLEADO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_eliminar_empleado` (
+    IN p_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    DELETE FROM `db_fincaturistica`.`empleados`
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+
+-- ====================================================================================== --
+
+-- ==================== PROCEDIMIENTOS ALMACENADOS PARA CARGO ===================== --
+
+-- ==================== INSERTAR CARGO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_cargo` (
+    IN p_descripcion VARCHAR(45)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    INSERT INTO `db_fincaturistica`.`cargo` (`descripcion`)
+    VALUES (p_descripcion);
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR TODOS LOS CARGOS ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_cargos` ()
+BEGIN
+    SELECT `id`, `descripcion`
+    FROM `db_fincaturistica`.`cargo`
+    ORDER BY `id`;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ACTUALIZAR CARGO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_actualizar_cargo` (
+    IN p_id INT,
+    IN p_descripcion VARCHAR(45)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    UPDATE `db_fincaturistica`.`cargo`
+    SET `descripcion` = p_descripcion
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ELIMINAR CARGO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_eliminar_cargo` (
+    IN p_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    DELETE FROM `db_fincaturistica`.`metodo_pago`
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ==================== PROCEDIMIENTOS ALMACENADOS PARA MENÚ ALIMENTACIÓN ===================== --
+
+-- ==================== INSERTAR MENÚ ALIMENTACIÓN ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_menu_alimentacion` (
+    IN p_dia VARCHAR(15),
+    IN p_plato_principal VARCHAR(100),
+    IN p_acompanamiento VARCHAR(100),
+    IN p_postre VARCHAR(100)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    INSERT INTO `db_fincaturistica`.`menualimentacion` (`dia`, `plato_principal`, `acompanamiento`, `postre`)
+    VALUES (p_dia, p_plato_principal, p_acompanamiento, p_postre);
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR MENÚS DE ALIMENTACIÓN ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_menus_alimentacion` ()
+BEGIN
+    SELECT `id`, `dia`, `plato_principal`, `acompanamiento`, `postre`
+    FROM `db_fincaturistica`.`menualimentacion`
+    ORDER BY `id`;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ACTUALIZAR MENÚ ALIMENTACIÓN ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_actualizar_menu_alimentacion` (
+    IN p_id INT,
+    IN p_dia VARCHAR(15),
+    IN p_plato_principal VARCHAR(100),
+    IN p_acompanamiento VARCHAR(100),
+    IN p_postre VARCHAR(100)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    UPDATE `db_fincaturistica`.`menualimentacion`
+    SET `dia` = p_dia,
+        `plato_principal` = p_plato_principal,
+        `acompanamiento` = p_acompanamiento,
+        `postre` = p_postre
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+
+-- ====================================================================================== --
+
+-- ==================== ELIMINAR MENÚ ALIMENTACIÓN ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_eliminar_menu_alimentacion` (
+    IN p_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    DELETE FROM `db_fincaturistica`.`menualimentacion`
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+
+DELIMITER ;
+-- ====================================================================================== --
+
+-- ==================== PROCEDIMIENTOS ALMACENADOS PARA ZONAS ENTRETENIMIENTO ===================== --
+
+-- ==================== INSERTAR ZONA ENTRETENIMIENTO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_zona_entretenimiento` (
+    IN p_nombre VARCHAR(45),
+    IN p_descripcion VARCHAR(200),
+    IN p_estado INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    INSERT INTO `db_fincaturistica`.`zonas_entretenimiento` (`nombre`, `descripcion`, `estado`)
+    VALUES (p_nombre, p_descripcion, p_estado);
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR ZONAS DE ENTRETENIMIENTO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_zonas_entretenimiento` ()
+BEGIN
+    SELECT `id`, `nombre`, `descripcion`, `estado`
+    FROM `db_fincaturistica`.`zonas_entretenimiento`
+    ORDER BY `id`;
+END $$
+
+-- ====================================================================================== --
+
+-- ==================== ACTUALIZAR ZONA ENTRETENIMIENTO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_actualizar_zona_entretenimiento` (
+    IN p_id INT,
+    IN p_nombre VARCHAR(45),
+    IN p_descripcion VARCHAR(200),
+    IN p_estado INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    UPDATE `db_fincaturistica`.`zonas_entretenimiento`
+    SET `nombre` = p_nombre,
+        `descripcion` = p_descripcion,
+        `estado` = p_estado
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+
+-- ====================================================================================== --
+
+-- ==================== ELIMINAR ZONA ENTRETENIMIENTO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_eliminar_zona_entretenimiento` (
+    IN p_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    DELETE FROM `db_fincaturistica`.`zonas_entretenimiento`
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+
+DELIMITER ;
+-- ====================================================================================== --
+
+-- ==================== PROCEDIMIENTOS ALMACENADOS PARA OPINIONES ===================== --
+
+-- ==================== INSERTAR OPINIÓN ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_opinion` (
+    IN p_idcliente INT,
+    IN p_calificacion INT,
+    IN p_comentario VARCHAR(500)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    INSERT INTO `db_fincaturistica`.`opinion` (`idcliente`, `calificacion`, `comentario`)
+    VALUES (p_idcliente, p_calificacion, p_comentario);
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR OPINIONES CON INFORMACIÓN DE CLIENTE ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_opiniones` ()
+BEGIN
+    SELECT o.`id`, o.`idcliente`, c.`nombre`, c.`apellido`, o.`calificacion`, o.`comentario`
+    FROM `db_fincaturistica`.`opinion` o
+    LEFT JOIN `db_fincaturistica`.`cliente` c ON o.`idcliente` = c.`id`
+    ORDER BY o.`id` DESC;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ACTUALIZAR OPINIÓN ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_actualizar_opinion` (
+    IN p_id INT,
+    IN p_idcliente INT,
+    IN p_calificacion INT,
+    IN p_comentario VARCHAR(500)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    UPDATE `db_fincaturistica`.`opinion`
+    SET `idcliente` = p_idcliente,
+        `calificacion` = p_calificacion,
+        `comentario` = p_comentario
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ELIMINAR OPINIÓN ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_eliminar_opinion` (
+    IN p_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    DELETE FROM `db_fincaturistica`.`opinion`
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ====================================================================================== --
+
+-- ==================== PROCEDIMIENTOS ALMACENADOS PARA MÉTODO DE PAGO ===================== --
+
+-- ==================== INSERTAR MÉTODO DE PAGO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_metodo_pago` (
+    IN p_descripcion VARCHAR(45)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    INSERT INTO `db_fincaturistica`.`metodo_pago` (`descripcion`)
+    VALUES (p_descripcion);
+    
+    COMMIT;
+END $$
+
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR TODOS LOS MÉTODOS DE PAGO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_metodos_pago` ()
+BEGIN
+    SELECT `id`, `descripcion`
+    FROM `db_fincaturistica`.`metodo_pago`
+    ORDER BY `id`;
+END $$
+
+-- ====================================================================================== --
+
+-- ==================== ACTUALIZAR MÉTODO DE PAGO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_actualizar_metodo_pago` (
+    IN p_id INT,
+    IN p_descripcion VARCHAR(45)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    UPDATE `db_fincaturistica`.`metodo_pago`
+    SET `descripcion` = p_descripcion
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ELIMINAR MÉTODO DE PAGO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_eliminar_metodo_pago` (
+    IN p_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    DELETE FROM `db_fincaturistica`.`metodo_pago`
+    WHERE `id` = p_id;
+    
+    COMMIT;
+END $$
+-- ====================================================================================== --
+
+-- ====================================================================================== --
+
+-- ==================== PROCEDIMIENTOS ALMACENADOS PARA MÉTODO DE ESTADO HABITACION ===================== --
+
+-- ==================== INSERTAR ESTADO HABITACION ===================== --
+DELIMITER $$
+CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_estado_habitacion` (
+    IN p_descripcion VARCHAR(45)
+)
+BEGIN 
+    INSERT INTO `db_fincaturistica`.`estadohabitacion` (`descripcion`)
+    VALUES (p_descripcion);
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR TODOS LOS ESTADOS DE HABITACION ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_estados_habitacion` ()
+BEGIN
+    SELECT `id`, `descripcion`
+    FROM `db_fincaturistica`.`estadohabitacion`;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ACTUALIZAR ESTADO HABITACION ===================== --
+DELIMITER $$
+CREATE PROCEDURE `db_fincaturistica`.`proc_actualizar_estado_habitacion` (
+    IN p_id INT,
+    IN p_descripcion VARCHAR(45),
+    INOUT _respuesta INT
+)
+
+BEGIN
+    SET _respuesta = 0;
+    UPDATE `db_fincaturistica`.`estadohabitacion`
+    SET `descripcion` = p_descripcion
+    WHERE `id` = p_id;
+    SET _respuesta = ROW_COUNT();
+END $$
+-- ====================================================================================== --
+
+-- ==================== ELIMINAR ESTADO HABITACION ===================== --
+DELIMITER $$
+CREATE PROCEDURE `db_fincaturistica`.`proc_eliminar_estado_habitacion` (
+    IN p_id INT,
+    OUT p_respuesta INT
+)
+BEGIN
+    SET p_respuesta = 0;
+    DELETE FROM `db_fincaturistica`.`estadohabitacion`
+    WHERE `id` = p_id;
+    SET p_respuesta = ROW_COUNT();
+END $$
+-- ====================================================================================== --
+
+-- ==================== PROCEDIMIENTOS ALMACENADOS PARA ESTADO RESERVA ===================== --
+
+-- ==================== INSERTAR ESTADO RESERVA ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_estadoreserva` (
+    IN _descripcion VARCHAR(45),
+    INOUT _respuesta INT
+)
+BEGIN
+    SET _respuesta = 0;
+    INSERT INTO `db_fincaturistica`.`estadoreserva` (`descripcion`)
+    VALUES (_descripcion);
+    SET _respuesta = LAST_INSERT_ID();
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR TODOS LOS ESTADOS RESERVA ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_todos_estadosreserva` ()
+BEGIN
+    SELECT `id`, `descripcion`
+    FROM `db_fincaturistica`.`estadoreserva`;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR ESTADO RESERVA POR ID ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_estadoreserva_por_id` (
+    IN _id INT
+)
+BEGIN
+    SELECT `id`, `descripcion`
+    FROM `db_fincaturistica`.`estadoreserva`
+    WHERE `id` = _id;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ACTUALIZAR ESTADO RESERVA ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_actualizar_estadoreserva` (
+    IN _id INT,
+    IN _descripcion VARCHAR(45),
+    INOUT _respuesta INT
+)
+BEGIN
+    SET _respuesta = 0;
+    UPDATE `db_fincaturistica`.`estadoreserva`
+    SET `descripcion` = _descripcion
+    WHERE `id` = _id;
+    SET _respuesta = ROW_COUNT();
+END $$
+-- ====================================================================================== --
+
+-- ==================== ELIMINAR ESTADO RESERVA ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_eliminar_estadoreserva` (
+    IN _id INT,
+    INOUT _respuesta INT
+)
+BEGIN
+    SET _respuesta = 0;
+    DELETE FROM `db_fincaturistica`.`estadoreserva`
+    WHERE `id` = _id;
+    SET _respuesta = ROW_COUNT();
+END $$
+-- ====================================================================================== --
+
+-- ==================== PROCEDIMIENTOS ALMACENADOS PARA EVENTOS ===================== --
+
+-- ==================== INSERTAR EVENTO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_eventos` (
+    IN _descripcion VARCHAR(200),
+    INOUT _respuesta INT
+)
+BEGIN
+    SET _respuesta = 0;
+    INSERT INTO `db_fincaturistica`.`eventos` (`descripcion`)
+    VALUES (_descripcion);
+    SET _respuesta = LAST_INSERT_ID();
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR TODOS LOS EVENTOS ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_todos_eventos` ()
+BEGIN
+    SELECT `id`, `descripcion`
+    FROM `db_fincaturistica`.`eventos`;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR EVENTO POR ID ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_eventos_por_id` (
+    IN _id INT
+)
+BEGIN
+    SELECT `id`, `descripcion`
+    FROM `db_fincaturistica`.`eventos`
+    WHERE `id` = _id;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ACTUALIZAR EVENTO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_actualizar_eventos` (
+    IN _id INT,
+    IN _descripcion VARCHAR(200),
+    INOUT _respuesta INT
+)
+BEGIN
+    SET _respuesta = 0;
+    UPDATE `db_fincaturistica`.`eventos`
+    SET `descripcion` = _descripcion
+    WHERE `id` = _id;
+    SET _respuesta = ROW_COUNT();
+END $$
+-- ====================================================================================== --
+
+-- ==================== ELIMINAR EVENTO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_eliminar_eventos` (
+    IN _id INT,
+    INOUT _respuesta INT
+)
+BEGIN
+    SET _respuesta = 0;
+    DELETE FROM `db_fincaturistica`.`eventos`
+    WHERE `id` = _id;
+    SET _respuesta = ROW_COUNT();
 END $$
 -- ====================================================================================== --
