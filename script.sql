@@ -1440,3 +1440,121 @@ BEGIN
     SET _respuesta = ROW_COUNT();
 END $$
 -- ====================================================================================== --
+
+-- ==================== PROCEDIMIENTOS ALMACENADOS PARA FACTURA ===================== --
+
+-- ==================== INSERTAR FACTURA ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_factura` (
+    IN _fecha DATE,
+    IN _total INT,
+    IN _idreserva INT,
+    IN _idmetodopago INT,
+    INOUT _respuesta INT
+)
+BEGIN
+    SET _respuesta = 0;
+    INSERT INTO `db_fincaturistica`.`factura` (`fecha`, `total`, `idreserva`, `idmetodopago`)
+    VALUES (_fecha, _total, _idreserva, _idmetodopago);
+    SET _respuesta = LAST_INSERT_ID();
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR TODAS LAS FACTURAS ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_todas_facturas` ()
+BEGIN
+    SELECT f.id, f.fecha, f.total, f.idreserva, f.idmetodopago,
+           r.fechallegada, r.fechasalida,
+           c.nombre AS cliente_nombre, c.apellido AS cliente_apellido,
+           h.tipohabitacion, h.precio AS precio_habitacion,
+           mp.descripcion AS metodo_pago
+    FROM `db_fincaturistica`.`factura` f
+    INNER JOIN `db_fincaturistica`.`reserva` r ON f.idreserva = r.id
+    INNER JOIN `db_fincaturistica`.`cliente` c ON r.idcliente = c.id
+    INNER JOIN `db_fincaturistica`.`habitacion` h ON r.idhabitacion = h.id
+    INNER JOIN `db_fincaturistica`.`metodo_pago` mp ON f.idmetodopago = mp.id;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR FACTURA POR ID ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_factura_por_id` (
+    IN _id INT
+)
+BEGIN
+    SELECT f.id, f.fecha, f.total, f.idreserva, f.idmetodopago,
+           r.fechallegada, r.fechasalida,
+           c.nombre AS cliente_nombre, c.apellido AS cliente_apellido,
+           h.tipohabitacion, h.precio AS precio_habitacion,
+           mp.descripcion AS metodo_pago
+    FROM `db_fincaturistica`.`factura` f
+    INNER JOIN `db_fincaturistica`.`reserva` r ON f.idreserva = r.id
+    INNER JOIN `db_fincaturistica`.`cliente` c ON r.idcliente = c.id
+    INNER JOIN `db_fincaturistica`.`habitacion` h ON r.idhabitacion = h.id
+    INNER JOIN `db_fincaturistica`.`metodo_pago` mp ON f.idmetodopago = mp.id
+    WHERE f.id = _id;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR FACTURAS POR RESERVA ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_facturas_por_reserva` (
+    IN _idreserva INT
+)
+BEGIN
+    SELECT f.id, f.fecha, f.total, f.idreserva, f.idmetodopago,
+           r.fechallegada, r.fechasalida,
+           c.nombre AS cliente_nombre, c.apellido AS cliente_apellido,
+           h.tipohabitacion, h.precio AS precio_habitacion,
+           mp.descripcion AS metodo_pago
+    FROM `db_fincaturistica`.`factura` f
+    INNER JOIN `db_fincaturistica`.`reserva` r ON f.idreserva = r.id
+    INNER JOIN `db_fincaturistica`.`cliente` c ON r.idcliente = c.id
+    INNER JOIN `db_fincaturistica`.`habitacion` h ON r.idhabitacion = h.id
+    INNER JOIN `db_fincaturistica`.`metodo_pago` mp ON f.idmetodopago = mp.id
+    WHERE f.idreserva = _idreserva;
+END $$
+-- ====================================================================================== --
+
+-- ==================== ACTUALIZAR FACTURA ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_actualizar_factura` (
+    IN _id INT,
+    IN _fecha DATE,
+    IN _total INT,
+    IN _idreserva INT,
+    IN _idmetodopago INT,
+    INOUT _respuesta INT
+)
+BEGIN
+    SET _respuesta = 0;
+    UPDATE `db_fincaturistica`.`factura`
+    SET `fecha` = _fecha,
+        `total` = _total,
+        `idreserva` = _idreserva,
+        `idmetodopago` = _idmetodopago
+    WHERE `id` = _id;
+    SET _respuesta = ROW_COUNT();
+END $$
+-- ====================================================================================== --
+
+-- ==================== ELIMINAR FACTURA ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_eliminar_factura` (
+    IN _id INT,
+    INOUT _respuesta INT
+)
+BEGIN
+    SET _respuesta = 0;
+    DELETE FROM `db_fincaturistica`.`factura`
+    WHERE `id` = _id;
+    SET _respuesta = ROW_COUNT();
+END $$
+-- ====================================================================================== --
