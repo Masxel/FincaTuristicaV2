@@ -3,7 +3,7 @@ class Insumos:
     nombre: str = ""
     cantidad: int = 0
     descripcion: str = ""
-    precio: int = 0 # Precio por unidad
+    precio: float = 0.0 # Precio por unidad
     
     def GetId(self) -> int:
         return self.id
@@ -25,7 +25,7 @@ class Insumos:
     def SetDescripcion(self, value: str) -> None:
         self.descripcion = value
     
-    def GetPrecio(self) -> int:
+    def GetPrecio(self) -> float:
         return self.precio
-    def SetPrecio(self, value: int) -> None:
+    def SetPrecio(self, value: float) -> None:
         self.precio = value
