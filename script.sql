@@ -271,6 +271,19 @@ BEGIN
 END $$
 -- ====================================================================================== --
 
+-- =================== PROCEDIMIENTOS ALMACENADOS PARA CONSULTAR INSUMO POR ID ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_insumo_por_id` (
+    IN _id INT
+)
+BEGIN
+    SELECT `id`, `nombre`, `cantidad`, `descripcion`, `precio`
+    FROM `db_fincaturistica`.`insumos`
+    WHERE `id` = _id;
+END $$
+-- ====================================================================================== --
+
 -- ==================== PROCEDIMIENTOS ALMACENADOS PARA TIENDA LOCAL ===================== --
 
 -- ==================== INSERTAR PRODUCTO EN TIENDA LOCAL ===================== --
@@ -455,6 +468,20 @@ BEGIN
     SELECT h.`id`, h.`tipohabitacion`, h.`precio`, h.`capacidad`, h.`estado`, h.`descripcion`, eh.`descripcion` as estado_descripcion
     FROM `db_fincaturistica`.`habitacion` h
     INNER JOIN `db_fincaturistica`.`estadohabitacion` eh ON h.`estado` = eh.`id`;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR HABITACION POR ID ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_habitacion_por_id` (
+    IN _id INT
+)
+BEGIN
+    SELECT h.`id`, h.`tipohabitacion`, h.`precio`, h.`capacidad`, h.`estado`, h.`descripcion`, eh.`descripcion` as estado_descripcion
+    FROM `db_fincaturistica`.`habitacion` h
+    INNER JOIN `db_fincaturistica`.`estadohabitacion` eh ON h.`estado` = eh.`id`
+    WHERE h.`id` = _id  ;
 END $$
 -- ====================================================================================== --
 
@@ -951,7 +978,16 @@ BEGIN
     COMMIT;
 END $$
 
--- ====================================================================================== --
+-- ==================== CONSULTAR MENÚ ALIMENTACIÓN POR ID ===================== --
+DELIMITER $$
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_menu_alimentacion_por_id` (
+    IN p_id INT
+)
+BEGIN
+    SELECT `id`, `dia`, `plato_principal`, `acompanamiento`, `postre`
+    FROM `db_fincaturistica`.`menualimentacion`
+    WHERE `id` = p_id;
+END $$
 
 -- ==================== ELIMINAR MENÚ ALIMENTACIÓN ===================== --
 DELIMITER $$

@@ -39,7 +39,7 @@ class InsumosRepository:
             conn = self.conexion.conectar_base_datos()
             cursor = conn.cursor()
 
-            id_insumo = insumo.idInsumo
+            id_insumo = insumo.id
             nombre = insumo.nombre
             cantidad = insumo.cantidad
             descripcion = insumo.descripcion
@@ -86,12 +86,17 @@ class InsumosRepository:
             print(f"Error al eliminar insumo: {e}")
             return 0
     
-    def consultar(self):
+    def consultar(self, id=None):
         try:
             conn = self.conexion.conectar_base_datos()
             cursor = conn.cursor()
             
-            cursor.execute("CALL proc_consultar_todos_insumos()")
+            if id is None:
+                # Consultar todos los insumos
+                cursor.execute("CALL proc_consultar_todos_insumos()")
+            else:
+                # Consultar insumo por ID
+                cursor.execute("CALL proc_consultar_insumo_por_id(?)", (id,))
 
             resultados = cursor.fetchall()
             cursor.close()
@@ -102,3 +107,21 @@ class InsumosRepository:
         except Exception as e:
             print(f"Error al consultar insumos: {e}")
             return []
+    
+    def consultar_por_id(self, id):
+        """Consulta un insumo específico por su ID"""
+        try:
+            conn = self.conexion.conectar_base_datos()
+            cursor = conn.cursor()
+            
+            cursor.execute("CALL proc_consultar_insumo_por_id(?)", (id,))
+
+            resultado = cursor.fetchone()
+            cursor.close()
+            conn.close()
+
+            return resultado
+
+        except Exception as e:
+            print(f"Error al consultar insumo por ID: {e}")
+            return None
