@@ -1,4 +1,3 @@
-import jsonify
 from Repository.ConexionRepository import ConexionRepository
 from Models.MetodoPago import MetodoPago
 

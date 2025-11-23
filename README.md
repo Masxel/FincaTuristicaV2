@@ -18,3 +18,9 @@ Agregado el procedimiento almacenado para consultar una habitación por su id, y
 Agregado procedimiento almacenado para consultar menú de alimentación por id, ya que no existia y solo estaba el GET() que traia todos los menús.
 
 Algunos repositorios estaban presentando errores con la conexión a base de datos, por lo que se corrigieron las llamadas a los cursores y conexiones para que funcionen correctamente.
+
+Se corrigieron los nombres de los métodos en MetodoPagoRepository para que coincidan con los llamados en MetodoPagoRoutes.
+
+Metodo de pago ahora tiene consulta por id implementada en el repositorio y la ruta correspondiente.
+
+Se agrego consulta de los productos en la tienda local por id en el repositorio y la ruta correspondiente.

@@ -350,6 +350,20 @@ BEGIN
     WHERE `id` = _id;
     SET _respuesta = ROW_COUNT();
 END $$
+
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR PRODUCTO DE TIENDA LOCAL POR ID ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_tienda_local_por_id` (
+    IN _id INT
+)
+BEGIN
+    SELECT `id`, `nombre`, `descripcion`, `precio`, `cantidaddisponible`
+    FROM `db_fincaturistica`.`tienda_local`
+    WHERE `id` = _id;
+END $$
 -- ====================================================================================== --
 
 -- ==================== PROCEDIMIENTOS ALMACENADOS PARA CLIENTES ===================== --
