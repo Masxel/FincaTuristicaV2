@@ -1231,6 +1231,20 @@ END $$
 
 -- ====================================================================================== --
 
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR TODOS LOS MÉTODOS DE PAGO ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_metodo_pago_Id`(
+    IN p_id INT
+)
+BEGIN
+    SELECT `id`, `descripcion`
+    FROM `db_fincaturistica`.`metodo_pago`
+    WHERE `id` = p_id;
+END $$
+
 -- ==================== ACTUALIZAR MÉTODO DE PAGO ===================== --
 DELIMITER $$
 
