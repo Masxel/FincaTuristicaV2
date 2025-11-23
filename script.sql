@@ -1063,6 +1063,18 @@ BEGIN
     ORDER BY `id`;
 END $$
 
+-- ==================== CONSULTAR ZONAS DE ENTRETENIMIENTO POR ID ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_zonas_entretenimiento_por_id` (
+    IN p_id INT
+)
+BEGIN
+    SELECT `id`, `nombre`, `descripcion`, `estado`
+    FROM `db_fincaturistica`.`zonas_entretenimiento`
+    WHERE `id` = p_id;
+END $$
+
 -- ====================================================================================== --
 
 -- ==================== ACTUALIZAR ZONA ENTRETENIMIENTO ===================== --

@@ -23,4 +23,8 @@ Se corrigieron los nombres de los métodos en MetodoPagoRepository para que coin
 
 Metodo de pago ahora tiene consulta por id implementada en el repositorio y la ruta correspondiente.
 
+Craedo procedimiento almacenado para consultar productos de la tienda local por id, ya que no existia y solo estaba el GET() que traia todos los productos.
 Se agrego consulta de los productos en la tienda local por id en el repositorio y la ruta correspondiente.
+
+Creado procedimiento almacenado para consultar zonas de entretenimiento por id, ya que no existia y solo estaba el GET() que traia todas las zonas.
+Se agrego consulta de las zonas de entretenimiento por id en el repositorio y la ruta correspondiente
