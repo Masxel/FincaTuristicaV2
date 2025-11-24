@@ -2,13 +2,24 @@ import json
 from flask import Blueprint, jsonify, request
 from Models.Cliente import Cliente
 from Repository.ClienteRepository import ClienteRepository
+from Utils.Crypto import *
 
 clientes_bp = Blueprint('clientes', __name__)
 
 @clientes_bp.route('/api/clientes', methods=["PUT"])
 def ActualizarCliente():
-    data = request.get_json()
-    try:        
+
+    try:
+
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400  
+
+            
         clienteConsultado = ClienteRepository().consultar_por_id(data.get("id"))
         
         if clienteConsultado:
@@ -122,7 +133,14 @@ def obtener_cliente_por_id(id_cliente):
 @clientes_bp.route('/api/clientes', methods=["POST"])
 def crear_cliente():   
     try:
-        data = request.get_json()
+
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400  
         
         ClienteModel = Cliente()
         ClienteModel.SetId(data.get("id"))

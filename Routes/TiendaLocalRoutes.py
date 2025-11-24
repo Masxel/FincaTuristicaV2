@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from Repository.TiendaLocalRepository import TiendaLocalRepository 
 from Models.TiendaLocal import TiendaLocal
+from Utils.Crypto import *
 
 
 tiendalocal_bp = Blueprint('tiendalocal_bp', __name__)
@@ -66,7 +67,14 @@ def obtener_tiendalocal_por_id(id):
 @tiendalocal_bp.route('/api/tiendalocal', methods=['POST'])
 def crear_tiendalocal():
     try:
-        data = request.get_json()
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
+        
         tiendaLocalProductos = TiendaLocal()
         tiendaLocalProductos.SetNombre(data.get('nombre'))
         tiendaLocalProductos.SetDescripcion(data.get('descripcion'))
@@ -96,7 +104,14 @@ def crear_tiendalocal():
 @tiendalocal_bp.route('/api/tiendalocal/<int:id>', methods=['PUT'])
 def actualizar_tiendalocal(id):
     try:
-        data = request.get_json()
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
+        
         tiendaLocalProductos = TiendaLocal()
         
         tiendaLocalProductos.SetId(id)

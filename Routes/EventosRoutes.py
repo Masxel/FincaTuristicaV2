@@ -2,6 +2,7 @@ import json
 from flask import Blueprint, request, jsonify
 from Models.Eventos import Eventos
 from Repository.EventosRepository import EventosRepository
+from Utils.Crypto import *
 
 eventos_bp = Blueprint('eventos', __name__)
 
@@ -9,9 +10,14 @@ eventos_bp = Blueprint('eventos', __name__)
 @eventos_bp.route('/api/eventos', methods=['POST'])
 def crear_evento():
     try:
-        
-     datos = request.get_json()
-         
+     
+     datosCifrados = request.get_json()
+     datos = decrypt_packet_aes(datosCifrados)
+
+    #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+     if datos is None:
+        return jsonify({"error": "Datos cifrados inválidos."}), 400
+
      evento = Eventos()
      evento.SetDescripcion(datos.get('descripcion'))
     
@@ -33,7 +39,13 @@ def crear_evento():
 @eventos_bp.route('/api/eventos', methods=['PUT'])
 def actualizar_evento():
     try:
-        datos = request.get_json()
+        datosCifrados = request.get_json()
+
+        datos = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if datos is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
         
         evento_actualizado = Eventos()
         evento_actualizado.SetId(datos.get("id"))

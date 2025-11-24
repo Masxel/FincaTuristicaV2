@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from Repository.ReservaRepository import ReservaRepository
 from Models.Reserva import Reserva
 from Helper.ReservaHelper import reservaHelper
+from Utils.Crypto import *
 
 reservas_bp = Blueprint('reservas', __name__)
 
@@ -87,7 +88,14 @@ def obtener_reserva_por_id(id_reserva):
 @reservas_bp.route('/api/reservas', methods=["POST"])
 def crear_reserva():
     try:
-        datos = request.get_json()
+        datosCifrados = request.get_json()
+
+        datos = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if datos is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
+        
         nueva_reserva = Reserva()
         nueva_reserva.SetFechaLlegada(datos.get("fechallegada"))
         nueva_reserva.SetFechaSalida(datos.get("fechasalida"))
@@ -152,7 +160,14 @@ def eliminar_reserva(id_reserva):
 @reservas_bp.route('/api/reservas/<int:id_reserva>', methods=["PUT"])
 def actualizar_reserva(id_reserva):
     try:
-        datos = request.get_json()
+        datosCifrados = request.get_json()
+
+        datos = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if datos is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
+        
         reserva_actualizada = Reserva()
         reserva_actualizada.SetId(id_reserva)
         reserva_actualizada.SetFechaLlegada(datos.get("fechallegada"))

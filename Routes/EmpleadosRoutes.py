@@ -2,6 +2,7 @@ import json
 from flask import Blueprint, jsonify, request
 from Repository.EmpleadosRepository import EmpleadosRepository
 from Models.Empleados import Empleados
+from Utils.Crypto import *
 
 empleados_bp = Blueprint('empleados', __name__)
         
@@ -97,7 +98,15 @@ def obtener_empleado_por_id(id_empleado):
 @empleados_bp.route('/api/empleados', methods=["POST"])
 def crear_empleado():
     try:
-        datos = request.get_json()
+
+        datosCifrados = request.get_json()
+
+        datos = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if datos is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400  
+
         nuevo_empleado = Empleados()
         nuevo_empleado.SetId(datos.get("id"))
         nuevo_empleado.SetNombre(datos.get("nombre"))
@@ -124,10 +133,18 @@ def crear_empleado():
             "status": "error"
         }), 500
     
+
 @empleados_bp.route('/api/empleados', methods=["PUT"])
 def actualizar_empleado():
     try:
-        datos = request.get_json()
+        datosCifrados = request.get_json()
+
+        datos = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if datos is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400  
+        
         empleado_actualizado = Empleados()
         empleado_actualizado.SetId(datos.get("id"))
         empleado_actualizado.SetNombre(datos.get("nombre"))
