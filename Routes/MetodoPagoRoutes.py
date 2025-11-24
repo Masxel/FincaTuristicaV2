@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
 from Repository.MetodoPagoRepository import MetodoPagoRepository 
 from Models.MetodoPago import MetodoPago
-    
+from Utils.Crypto import *
+
 metodopago_bp = Blueprint('metodopago_bp', __name__)
 
 @metodopago_bp.route('/api/metodopago', methods=['GET'])
@@ -60,7 +61,14 @@ def obtener_metodopago_por_id(id):
 @metodopago_bp.route('/api/metodopago', methods=['POST'])
 def crear_metodopago():
     try:
-        data = request.get_json()
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
+        
         nuevo_metodopago = MetodoPago()
         nuevo_metodopago.SetDescripcion(data.get('descripcion'))
         

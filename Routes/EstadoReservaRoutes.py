@@ -2,6 +2,7 @@ import json
 from flask import Blueprint, request, jsonify
 from Models.EstadoReserva import EstadoReserva
 from Repository.EstadoReservaRepository import EstadoReservaRepository
+from Utils.Crypto import *
 
 estadoreserva_bp = Blueprint('estadoreserva', __name__)
 
@@ -43,7 +44,14 @@ def obtener_todos_estadoreserva():
 @estadoreserva_bp.route("/api/estadoreserva/", methods=["POST"])
 def crear_estadoreserva():
     try:
-        datos = request.get_json()
+        datosCifrados = request.get_json()
+
+        datos = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if datos is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400  
+
         nuevo_estadoreserva = EstadoReserva()
         nuevo_estadoreserva.SetDescripcion(datos.get("descripcion"))
         
@@ -69,7 +77,14 @@ def crear_estadoreserva():
 @estadoreserva_bp.route("/api/estadoreserva", methods=["PUT"])
 def actualizar_estadoreserva():
     try:
-        datos = request.get_json()
+        datosCifrados = request.get_json()
+
+        datos = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if datos is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400  
+
         estadoreserva_actualizado = EstadoReserva()
         estadoreserva_actualizado.SetId(datos.get("id"))
         estadoreserva_actualizado.SetDescripcion(datos.get("descripcion"))

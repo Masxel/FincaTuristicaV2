@@ -2,6 +2,7 @@ import json
 from flask import Blueprint, jsonify, request
 from Models.EstadoHabitacion import EstadoHabitacion 
 from Repository.EstadoHabitacionRepository import EstadoHabitacionRepository
+from Utils.Crypto import *
 
 estadohabitacion_bp = Blueprint('estadohabitacion', __name__)
 
@@ -43,7 +44,15 @@ def obtener_todos_estadohabitacion():
 @estadohabitacion_bp.route("/api/estadohabitacion/", methods=["POST"])
 def crear_estadohabitacion():
     try:
-        datos = request.get_json()
+
+        datosCifrados = request.get_json()
+
+        datos = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if datos is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400        
+
         nuevo_estadohabitacion = EstadoHabitacion()
         nuevo_estadohabitacion.descripcion = datos.get("descripcion")
         
@@ -69,7 +78,14 @@ def crear_estadohabitacion():
 @estadohabitacion_bp.route("/api/estadohabitacion/", methods=["PUT"])
 def actualizar_estadohabitacion():
     try:
-        datos = request.get_json()
+        datosCifrados = request.get_json()
+
+        datos = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if datos is None:
+            return jsonify({"error": "Datos cifrados inválidos"}), 400
+
         estadohabitacion_actualizado = EstadoHabitacion()
         estadohabitacion_actualizado.SetId(datos.get("id"))
         estadohabitacion_actualizado.SetDescripcion(datos.get("descripcion"))

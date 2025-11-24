@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from Repository.HabitacionRepository import HabitacionRepository
 from Models.Habitacion import Habitacion
+from Utils.Crypto import *
 
 habitaciones_bp = Blueprint('habitaciones_bp', __name__)
 
@@ -80,7 +81,14 @@ def obtener_listahabitaciones():
 @habitaciones_bp.route('/api/habitaciones', methods=['POST'])
 def crear_habitacion():
     try:
-        data = request.get_json()
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
+        
         nueva_habitacion = Habitacion()
         nueva_habitacion.SetCapacidad(data.get('capacidad'))
         nueva_habitacion.SetEstado(data.get('estado'))
@@ -111,7 +119,14 @@ def crear_habitacion():
 @habitaciones_bp.route('/api/habitaciones/<int:id>', methods=['PUT'])
 def actualizar_habitacion(id):
     try:
-        data = request.get_json()
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
+        
         habitacion_actualizada = Habitacion()
         habitacion_actualizada.SetId(id)
         habitacion_actualizada.SetCapacidad(data.get('capacidad'))

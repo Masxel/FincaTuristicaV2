@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from Repository.MenuAlimentacionRepository import MenuAlimentacionRepository 
 from Models.MenuAlimentacion import MenuAlimentacion
+from Utils.Crypto import *
 
 menualimentacion_bp = Blueprint('menualimentacion_bp', __name__)
 
@@ -42,7 +43,13 @@ def obtener_menualimentacion():
 @menualimentacion_bp.route('/api/menualimentacion', methods=['POST'])
 def crear_menu_alimentacion():
     try:
-        datos = request.get_json()
+        datosCifrados = request.get_json()
+
+        datos = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if datos is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
         
         menualimentacion = MenuAlimentacion()
         menualimentacion.SetDia(datos.get('dia'))
@@ -114,7 +121,14 @@ def obtener_menu_alimentacion_por_id(id):
 @menualimentacion_bp.route('/api/menualimentacion/<int:id>', methods=['PUT'])
 def actualizar_menu_alimentacion(id):
     try:
-        data = request.get_json()
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
+        
         menu_actualizado = MenuAlimentacion()
         menu_actualizado.SetId(id)
         menu_actualizado.SetDia(data.get('dia'))

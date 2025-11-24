@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from Repository.ZonasEntretenimientoRepository import ZonasEntretenimientoRepository 
 from Models.ZonasEntretenimiento import ZonasEntretenimiento
+from Utils.Crypto import *
 
 zonaentretenimiento_bp = Blueprint('zonaentretenimiento_bp', __name__)
 
@@ -76,7 +77,14 @@ def obtener_zonaentretenimiento_por_id(id):
 @zonaentretenimiento_bp.route('/api/zonaentretenimiento', methods=['POST'])
 def crear_zonaentretenimiento():
     try:
-        data = request.get_json()
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
+        
         nueva_zonaentretenimiento = ZonasEntretenimiento()
         nueva_zonaentretenimiento.SetNombre(data.get('nombre'))
         nueva_zonaentretenimiento.SetDescripcion(data.get('descripcion'))
@@ -104,7 +112,14 @@ def crear_zonaentretenimiento():
 @zonaentretenimiento_bp.route('/api/zonaentretenimiento/<int:id>', methods=['PUT'])
 def actualizar_zonaentretenimiento(id):
     try:
-        data = request.get_json()
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
+        
         zonaentretenimiento_actualizada = ZonasEntretenimiento()
         zonaentretenimiento_actualizada.SetId(id)
         zonaentretenimiento_actualizada.SetNombre(data.get('nombre'))

@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, request
 from Repository.FacturaRepository import FacturaRepository
 from Models.Factura import Factura
 from Helper.FacturaHelper import reservaHelper
+from Utils.Crypto import *
 
 facturas_bp = Blueprint('facturas', __name__)
 
@@ -87,7 +88,14 @@ def obtener_factura_por_id(id):
 @facturas_bp.route('/api/facturas', methods=["POST"])
 def crear_factura():
     try:
-        datos = request.get_json()
+        datosCifrados = request.get_json()
+
+        datos = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if datos is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
+
         nueva_factura = Factura()
         nueva_factura.SetIdReserva(datos.get("idreserva"))
         nueva_factura.SetIdMetodoPago(datos.get("idmetodopago"))

@@ -2,6 +2,7 @@ import json
 from flask import Blueprint, jsonify, request
 from Models.Insumos import Insumos
 from Repository.InsumosRepository import InsumosRepository
+from Utils.Crypto import *
 
 
 insumos_bp = Blueprint('insumos', __name__)
@@ -80,7 +81,13 @@ def obtener_insumo_por_id(id):
 @insumos_bp.route('/api/insumos', methods=["POST"])
 def crear_insumo():
     try:
-        data = request.json
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
         
         nuevo_insumo = Insumos()
         nuevo_insumo.SetNombre(data.get("nombre"))
@@ -109,7 +116,13 @@ def crear_insumo():
 @insumos_bp.route('/api/insumos/<int:id>', methods=["PUT"])
 def actualizar_insumo(id):
     try:
-        data = request.json
+        datosCifrados = request.get_json()
+
+        data = decrypt_packet_aes(datosCifrados)
+
+        #Si el dato es none, significa que hubo un error con el cifrado/datos, etc.
+        if data is None:
+            return jsonify({"error": "Datos cifrados inválidos."}), 400
         
         insumo_actualizado = Insumos()
         insumo_actualizado.SetId(id)
