@@ -380,7 +380,6 @@ CREATE PROCEDURE `db_fincaturistica`.`proc_insertar_cliente` (
     INOUT _respuesta INT
 )
 BEGIN
-   BEGIN
     INSERT INTO `db_fincaturistica`.`cliente` (`id`, `nombre`, `apellido`, `telefono`, `email`)
     VALUES (_id, _nombre, _apellido, _telefono, _email);
     
@@ -620,6 +619,43 @@ BEGIN
     SET _respuesta = ROW_COUNT();
 END $$
 -- ====================================================================================== --
+
+-- ==================== CONSULTAR RESERVAS POR HABITACION ===================== --
+DELIMITER $$
+
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_reservas_por_habitacion` (
+    IN _idhabitacion INT
+)
+BEGIN
+    SELECT r.`id`, r.`fechallegada`, r.`fechasalida`, r.`idcliente`, r.`idhabitacion`, r.`estadoreserva`, r.`idevento`,
+           c.`nombre` AS cliente_nombre, c.`apellido` AS cliente_apellido,
+           er.`descripcion` AS estado_descripcion
+    FROM `db_fincaturistica`.`reserva` r
+    INNER JOIN `db_fincaturistica`.`cliente` c ON r.`idcliente` = c.`id`
+    INNER JOIN `db_fincaturistica`.`estadoreserva` er ON r.`estadoreserva` = er.`id`
+    WHERE r.`idhabitacion` = _idhabitacion
+    ORDER BY r.`fechallegada` DESC;
+END $$
+-- ====================================================================================== --
+
+-- ==================== CONSULTAR RESERVAS POR ID DE RESERVA ===================== --
+DELIMITER $$
+CREATE PROCEDURE `db_fincaturistica`.`proc_consultar_reserva_por_id` (
+    IN _id INT
+)
+BEGIN
+    SELECT r.`id`, r.`fechallegada`, r.`fechasalida`, r.`idcliente`, r.`idhabitacion`, r.`estadoreserva`, r.`idevento`,
+           c.`nombre` AS cliente_nombre, c.`apellido` AS cliente_apellido,
+           h.`tipohabitacion` AS habitacion_tipo, h.`descripcion` AS habitacion_descripcion,
+           er.`descripcion` AS estado_descripcion,
+           e.`descripcion` AS evento_descripcion
+    FROM `db_fincaturistica`.`reserva` r
+    INNER JOIN `db_fincaturistica`.`cliente` c ON r.`idcliente` = c.`id`
+    INNER JOIN `db_fincaturistica`.`habitacion` h ON r.`idhabitacion` = h.`id`
+    INNER JOIN `db_fincaturistica`.`estadoreserva` er ON r.`estadoreserva` = er.`id`
+    LEFT JOIN `db_fincaturistica`.`eventos` e ON r.`idevento` = e.`id`
+    WHERE r.`id` = _id;
+END $$
 
 -- ==================== PROCEDIMIENTOS ALMACENADOS PARA ESTADOS DE RESERVA ===================== --
 

@@ -1,25 +1,20 @@
 from Repository.ConexionRepository import ConexionRepository
+from Models.Reserva import Reserva
 
 class ReservaRepository:
     
     def __init__(self):
         self.conexion = ConexionRepository()
     
-    def insertar(self, reserva):
+    def insertar(self, reserva: Reserva):
         try:
             conn = self.conexion.conectar_base_datos()
             cursor = conn.cursor()
-
-            fechallegada = reserva.fechallegada
-            fechasalida = reserva.fechasalida
-            idcliente = reserva.idcliente
-            idhabitacion = reserva.idhabitacion
-            estadoreserva = reserva.estadoreserva
-            idevento = reserva.idevento if reserva.idevento > 0 else None
             
             cursor.execute(
                 "CALL proc_insertar_reserva(?, ?, ?, ?, ?, ?, @respuesta)",
-                (fechallegada, fechasalida, idcliente, idhabitacion, estadoreserva, idevento)
+                (reserva.GetFechaLlegada(), reserva.GetFechaSalida(), reserva.GetIdCliente(), 
+                 reserva.GetIdHabitacion(), reserva.GetEstadoReserva(), reserva.GetIdEvento())
             )
             
             cursor.execute("SELECT @respuesta")
@@ -36,22 +31,15 @@ class ReservaRepository:
             print(f"Error al insertar reserva: {e}")
             return 0
     
-    def actualizar(self, reserva):
+    def actualizar(self, reserva: Reserva):
         try:
             conn = self.conexion.conectar_base_datos()
             cursor = conn.cursor()
-
-            id_reserva = reserva.id
-            fechallegada = reserva.fechallegada
-            fechasalida = reserva.fechasalida
-            idcliente = reserva.idcliente
-            idhabitacion = reserva.idhabitacion
-            estadoreserva = reserva.estadoreserva
-            idevento = reserva.idevento if reserva.idevento > 0 else None
             
             cursor.execute(
                 "CALL proc_actualizar_reserva(?, ?, ?, ?, ?, ?, ?, @respuesta)",
-                (id_reserva, fechallegada, fechasalida, idcliente, idhabitacion, estadoreserva, idevento)
+                (reserva.GetId(), reserva.GetFechaLlegada(), reserva.GetFechaSalida(), 
+                 reserva.GetIdCliente(), reserva.GetIdHabitacion(), reserva.GetEstadoReserva(), reserva.GetIdEvento())
             )
             
             cursor.execute("SELECT @respuesta")
@@ -109,68 +97,40 @@ class ReservaRepository:
             print(f"Error al consultar reservas: {e}")
             return []
     
-    def consultar_clientes_disponibles(self):
+    def consultar_por_id(self, id_reserva):
+        try:
+            print("Consultando reserva por ID:", id_reserva)
+            conn = self.conexion.conectar_base_datos()
+            print("Conexión establecida.")
+            cursor = conn.cursor()
+            print("Cursor creado.")
+            cursor.execute("CALL proc_consultar_reserva_por_id(?)", (id_reserva,))
+            print("Procedimiento almacenado ejecutado.")
+            resultado = cursor.fetchone()
+            print("Resultado obtenido:", resultado)
+            
+            cursor.close()
+            conn.close()
+
+            return resultado
+
+        except Exception as e:
+            print(f"Error al consultar reserva por ID: {e}")
+            return None
+        
+    def consultar_reservas_por_habitacion(self, id_habitacion):
         try:
             conn = self.conexion.conectar_base_datos()
             cursor = conn.cursor()
             
-            cursor.execute("CALL proc_consultar_todos_clientes()")
+            cursor.execute("CALL proc_consultar_reservas_por_habitacion(?)", (id_habitacion,))
+
             resultados = cursor.fetchall()
             cursor.close()
             conn.close()
-            
+
             return resultados
-            
+
         except Exception as e:
-            print(f"Error al consultar clientes: {e}")
-            return []
-    
-    def consultar_habitaciones_disponibles(self):
-        try:
-            conn = self.conexion.conectar_base_datos()
-            cursor = conn.cursor()
-            
-            cursor.execute("CALL proc_consultar_todas_habitaciones()")
-            resultados = cursor.fetchall()
-            cursor.close()
-            conn.close()
-            
-            return resultados
-            
-        except Exception as e:
-            print(f"Error al consultar habitaciones: {e}")
-            return []
-    
-    def consultar_estados_reserva(self):
-        """Consulta todos los estados de reserva disponibles"""
-        try:
-            conn = self.conexion.conectar_base_datos()
-            cursor = conn.cursor()
-            
-            cursor.execute("CALL proc_consultar_estados_reserva()")
-            resultados = cursor.fetchall()
-            cursor.close()
-            conn.close()
-            
-            return resultados
-            
-        except Exception as e:
-            print(f"Error al consultar estados de reserva: {e}")
-            return []
-    
-    def consultar_eventos_disponibles(self):
-        """Consulta todos los eventos disponibles"""
-        try:
-            conn = self.conexion.conectar_base_datos()
-            cursor = conn.cursor()
-            
-            cursor.execute("CALL proc_consultar_eventos()")
-            resultados = cursor.fetchall()
-            cursor.close()
-            conn.close()
-            
-            return resultados
-            
-        except Exception as e:
-            print(f"Error al consultar eventos: {e}")
+            print(f"Error al consultar reservas por habitación: {e}")
             return []

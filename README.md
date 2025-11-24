@@ -28,3 +28,11 @@ Se agrego consulta de los productos en la tienda local por id en el repositorio 
 
 Creado procedimiento almacenado para consultar zonas de entretenimiento por id, ya que no existia y solo estaba el GET() que traia todas las zonas.
 Se agrego consulta de las zonas de entretenimiento por id en el repositorio y la ruta correspondiente
+
+Creado procedimiento almacenado para obtener todas las reservas realizadas en la finca por la habitación.
+
+Creado procedimiento almacenado para obtener reservas por Id de reserva.
+
+Creado FacturaModel, FacturaRepository, FacturaHelper y FacturaRoutes para gestionar la creación y consulta de facturas en la aplicación.
+
+Se implementó la funcionalidad para crear facturas basadas en reservas existentes, incluyendo la validación del estado de la reserva y el cálculo del total a pagar según el método de pago seleccionado.

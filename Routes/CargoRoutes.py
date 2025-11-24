@@ -47,6 +47,7 @@ def crear_cargo():
         data = request.json
         
         nuevo_cargo = Cargo()
+        
         nuevo_cargo.SetDescripcion(data.get("descripcion"))
 
         if CargoRepository().insertar(nuevo_cargo):

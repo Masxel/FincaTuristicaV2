@@ -11,6 +11,8 @@ from Routes.MenuAlimentacionRoutes import menualimentacion_bp
 from Routes.MetodoPagoRoutes import metodopago_bp
 from Routes.TiendaLocalRoutes import tiendalocal_bp
 from Routes.ZonaEntretenimientoRoutes import zonaentretenimiento_bp
+from Routes.ReservaRoutes import reservas_bp
+from Routes.FacturaRoutes import facturas_bp
 
 # Crear la aplicación Flask
 app = flask.Flask(__name__)
@@ -28,6 +30,8 @@ app.register_blueprint(menualimentacion_bp)
 app.register_blueprint(metodopago_bp)
 app.register_blueprint(tiendalocal_bp)
 app.register_blueprint(zonaentretenimiento_bp)
+app.register_blueprint(reservas_bp)
+app.register_blueprint(facturas_bp)
 
 # Solo ejecutar si es el archivo principal
 if __name__ == '__main__':

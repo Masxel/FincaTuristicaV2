@@ -17,11 +17,12 @@ def obtener_habitacion(id):
                 "status": "error"
         }), 404
         
+        print(habitacionrepository)
         habitacion.SetId(habitacionrepository[0])
         habitacion.SetTipoHabitacion(habitacionrepository[1])
         habitacion.SetPrecio(habitacionrepository[2])
         habitacion.SetCapacidad(habitacionrepository[3])
-        habitacion.SetEstado(habitacionrepository[4])
+        habitacion.SetEstado(habitacionrepository[6])
         habitacion.SetDescripcion(habitacionrepository[5])
         
         dict_habitacion = {
@@ -29,7 +30,7 @@ def obtener_habitacion(id):
                 "tipohabitacion": habitacion.GetTipoHabitacion(),
                 "precio": habitacion.GetPrecio(),
                 "capacidad": habitacion.GetCapacidad(),
-                "estado": habitacionrepository[5],
+                "estado": habitacion.GetEstado(),
                 "descripcion": habitacion.GetDescripcion()
             }
                                 
@@ -61,7 +62,7 @@ def obtener_listahabitaciones():
                 "tipohabitacion": habitacionData[1],
                 "precio": habitacionData[2],
                 "capacidad": habitacionData[3],
-                "estado": habitacionData[6],
+                "estado": habitacionData[7],
                 "descripcion": habitacionData[5]
             }
             lstHabitaciones.append(dict_habitacion)

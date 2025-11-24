@@ -50,12 +50,13 @@ class EmpleadosRepository:
             cursor.execute("CALL proc_eliminar_empleado(?)", (id,))
             cursor.commit()
             
+            cursor.close()
+            conn.close()
+            
             return True
         except Exception as e:
             print(f"Error al eliminar empleado: {str(e)}")
             return False
-        finally:
-            cursor.close()
     
     def consultar_todos_empleados(self):
         try:           
@@ -64,12 +65,13 @@ class EmpleadosRepository:
             
             cursor.execute("CALL proc_consultar_empleados()")
             resultados = cursor.fetchall()
+            
+            cursor.close()
+            conn.close()
             return resultados
         except Exception as e:
             print(f"Error al consultar empleados: {str(e)}")
             return []
-        finally:
-            cursor.close()
     
     def consultar_empleado_por_id(self, id):
         try:
@@ -78,12 +80,13 @@ class EmpleadosRepository:
             cursor.execute("CALL proc_consultar_empleado_por_id(?)", (id,))
             
             resultado = cursor.fetchone()
+            
+            cursor.close()
+            conn.close()
             return resultado
         except Exception as e:
             print(f"Error al consultar empleado por ID: {str(e)}")
             return None
-        finally:
-            cursor.close()
     
     def consultar(self, id=None):
         if id is None:

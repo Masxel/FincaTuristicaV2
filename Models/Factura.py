@@ -17,9 +17,9 @@ class Factura:
     def SetFecha(self, value: datetime) -> None:
         self.fecha = value
     
-    def GetTotal(self) -> int:
+    def GetTotal(self) -> float:
         return self.total
-    def SetTotal(self, value: int) -> None:
+    def SetTotal(self, value: float) -> None:
         self.total = value
     
     def GetIdReserva(self) -> int:
